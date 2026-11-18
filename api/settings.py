@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -37,14 +38,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'drf_yasg',
     'users',
+    'products',
+    'quotes',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -106,13 +111,24 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Bogota'
 
 USE_I18N = True
 
 USE_TZ = True
+
+# CORS: orígenes del frontend autorizados a llamar al API.
+# Se puede sobrescribir con la variable de entorno CORS_ALLOWED_ORIGINS (separada por comas).
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get(
+        'CORS_ALLOWED_ORIGINS',
+        'http://localhost:5173,http://127.0.0.1:5173',
+    ).split(',')
+    if origin.strip()
+]
 
 REST_FRAMEWORK = {
 
@@ -129,6 +145,21 @@ REST_FRAMEWORK = {
 
 STATIC_URL = 'static/'
 STATIC_ROOT = './static/'
+
+# Archivos subidos (imágenes de productos). En desarrollo los sirve Django.
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+# Archivos privados (PDF de cotizaciones): no se sirven por URL, solo por endpoints autenticados.
+PRIVATE_MEDIA_ROOT = BASE_DIR / 'private'
+
+# Datos del emisor que aparecen en las cotizaciones.
+SIEV_COMPANY = {
+    'name': 'SOLUCIONES INTEGRALES ELÉCTRICAS DEL VALLE S.A.S.',
+    'nit': '900 887 302-0',
+    'address': 'Carrera 3A #14-117, Candelaria, Colombia',
+    'phone': '+57 318 309 0738',
+    'email': 'sie.delvalle@hotmail.com',
+}
 
 AUTH_USER_MODEL = 'users.User'
 
